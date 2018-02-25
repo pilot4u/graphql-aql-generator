@@ -106,3 +106,35 @@ router.use('/graphql', createGraphQLRouter({
 
 ```
 In this example two types and a query are defined. `BlogEntry` and `Author`. BlogEntry has a sub attribute Author which is fetched with a @aql directive. The query returns a BlogEntry with the corresponding Author depending on the BlogEntries _key.
+
+in order to use remote debugger via node express (branch: for-remote-debug):
+const express = require("express");
+const generator = require("graphql-aql-generator");
+const handelr = require("graphql-aql-generator/handler");
+const arangojs = require("arangojs-debug");
+const graphql-sync = require("graphql-sync")
+
+const db = arangojs({
+  url: `http://${username}:${password}@${host}:${port}`
+});
+
+const arangoaSchema = generator(arangoDBtypeDefs, db);
+
+// Initialize the app
+const app = express();
+
+// The GraphQL endpoint
+app.use(
+  "/graphql",
+  bodyParser.json(),
+  handelr({
+    schema: arangoaSchema,
+    graphiql: true,
+    graphql: graphql-sync
+  })
+);
+
+// Start the server
+app.listen(3000, () => {
+  console.log("Go to http://localhost:3000/graphiql to run queries!");
+});
