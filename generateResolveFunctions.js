@@ -1,13 +1,14 @@
-'use strict';
+"use strict";
 
-const db = require('@arangodb').db;
+//const db = require('@arangodb').db;
+const deasync = require("deasync");
 
-module.exports = (ast, resolveFunctions) => {
-  ast.definitions.forEach( objectDefinition => {
 
-    if (objectDefinition.kind !== 'ObjectTypeDefinition') return;
+module.exports = (ast, resolveFunctions, db) => {
+  ast.definitions.forEach(objectDefinition => {
+    if (objectDefinition.kind !== "ObjectTypeDefinition") return;
 
-    if (objectDefinition.name.value == 'Query') {
+    if (objectDefinition.name.value == "Query") {
       // console.log('objectDefinition Query');
 
       objectDefinition.fields.forEach(field => {
@@ -15,7 +16,7 @@ module.exports = (ast, resolveFunctions) => {
         // print('fieldName', fieldName);
         const collection = field.type.name.value;
         // print('collection', collection);
-        
+
         /*const args = field.arguments;
         const argList = [];
 
@@ -26,21 +27,46 @@ module.exports = (ast, resolveFunctions) => {
             argList.push({[arg.name.value]: arg.type.type.name.value});
         } // for*/
 
-        if (!resolveFunctions['Query']) resolveFunctions['Query'] = {};
-        resolveFunctions['Query'][fieldName] = function(dontknow, args, dontknow2, astPart) { // a undefined, b id:4, undefined, astpart
+        if (!resolveFunctions["Query"]) resolveFunctions["Query"] = {};
+        resolveFunctions["Query"][fieldName] = function(
+          dontknow,
+          args,
+          dontknow2,
+          astPart
+        ) {
+          // a undefined, b id:4, undefined, astpart
 
-            // print(args);
+          // print(args);
 
-            const filterList = Object.keys(args).map(arg => `doc.${arg} == ${'string' === typeof args[arg] ? "'" + args[arg] + "'" : args[arg] }`);
+          const filterList = Object.keys(args).map(
+            arg =>
+              `doc.${arg} == ${
+                "string" === typeof args[arg]
+                  ? "'" + args[arg] + "'"
+                  : args[arg]
+              }`
+          );
 
-            // print('filterList', filterList);
-            // print(`for doc in ${collection} filter ${filterList.join(' AND ')} return doc`);
-            const res = db._query(`for doc in ${collection} filter ${filterList.join(' AND ')} return doc`).toArray();
-
-            return res.pop();
-        } // function      
+          // print('filterList', filterList);
+          // print(`for doc in ${collection} filter ${filterList.join(' AND ')} return doc`);
+          let result = "";
+          const res = db
+            .query(
+              `for doc in ${collection} filter ${filterList.join(
+                " AND "
+              )} return doc`
+            )
+            .then(r => {
+              result = r;
+            });
+          while (result === "") {
+            deasync.sleep(100);
+          }
+          return result._result.pop();
+        }; // function
       }); // fields.forEach
-    } else { // if field.name.value == Query
+    } else {
+      // if field.name.value == Query
       /*print('----- != QUERY -----');
       print(JSON.parse(JSON.stringify(objectDefinition)));
       print('----- != QUERY -----');*/
@@ -49,28 +75,32 @@ module.exports = (ast, resolveFunctions) => {
       objectDefinition.fields.forEach(field => {
         const fieldName = field.name.value;
 
-        const isArray = 'ListType' === field.type.kind ? true : false;
+        const isArray = "ListType" === field.type.kind ? true : false;
 
         if (field.directives.length) {
           const directive = field.directives.shift();
 
-          if ('aql' === directive.name.value) {
+          if ("aql" === directive.name.value) {
             const arg = directive.arguments.shift();
-            if ('exec' === arg.name.value) {
+            if ("exec" === arg.name.value) {
               const aql = arg.value.value;
-              const parseResult = db._parse(aql);
+              // const parseResult = arangojs.aql([aql]);
               /*print('---parse result-----');
               print(parseResult);
               print('---parse result-----');*/
 
-
               // ?: will be fixed by https://github.com/arangodb/arangodb/pull/2772 sometimes
-              const usesCurrent = !!~(parseResult.bindVars ? parseResult.bindVars : parseResult.parameters).indexOf('current');
+              // const usesCurrent = !!~(parseResult.bindVars ? parseResult.bindVars : parseResult.parameters).indexOf('current');
 
-              if (!resolveFunctions[objectTypeName]) resolveFunctions[objectTypeName] = {};
+              if (!resolveFunctions[objectTypeName])
+                resolveFunctions[objectTypeName] = {};
 
-              resolveFunctions[objectTypeName][fieldName] = function(obj, emptyObject, dontknow, returnTypeOperationDesc) {
-
+              resolveFunctions[objectTypeName][fieldName] = function(
+                obj,
+                emptyObject,
+                dontknow,
+                returnTypeOperationDesc
+              ) {
                 /*print('-- ARGUMENTS --');
                 print(JSON.parse(JSON.stringify(arguments)));
                 print('-- ARGUMENTS --');
@@ -79,21 +109,28 @@ module.exports = (ast, resolveFunctions) => {
                 print('-----OBJ-----');*/
 
                 const params = {};
-                if (usesCurrent) {
-                  params.current = obj;
+                // if (usesCurrent) {
+                params.current = obj;
+                // }
+                let result = "";
+                let d = db.query(aql, params).then(r => {
+                  result = r;
+                });
+                while (result === "") {
+                  deasync.sleep(100);
                 }
-                const res = db._query(aql, params).toArray();
+                const res = result._result;
 
                 if (isArray) {
                   return res;
                 } else {
                   return res.pop();
                 }
-              }
+              };
             }
           } // if
         } // if
       });
     }
   }); // forEach
-}
+};

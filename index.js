@@ -41,6 +41,7 @@ const parse = gql.parse;
 
 const graphql_1 = gql;
 const graphql_3 = gql;
+var _db = '';
 
 function makeExecutableSchema(
   typeDefs,
@@ -78,7 +79,7 @@ function _generateSchema(
   print(JSON.stringify(ast, false, 2));
   print('------- AST ----------');*/
 
-  generateResolveFunctions(ast, resolveFunctions);
+  generateResolveFunctions(ast, resolveFunctions, _db);
 
 
 
@@ -261,4 +262,7 @@ function forEachField(schema, fn) {
     });
 }
 
-module.exports = (typeDefs) => makeExecutableSchema(typeDefs);
+module.exports = (typeDefs, db) => {
+    _db = db;
+    return makeExecutableSchema(typeDefs)
+};

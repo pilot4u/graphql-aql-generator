@@ -1,15 +1,43 @@
 {
-  "name": "graphql-aql-generator",
-  "version": "2.1.0",
+  "_from": "graphql-aql-generator",
+  "_id": "graphql-aql-generator@2.1.0",
+  "_inBundle": false,
+  "_integrity": "sha512-ajwZbqsqaFrIuP/nnndQt0lzK8ZBo0AX2aNyuVDpey4v8hhXgD/YkWF9IlV+Hynx/uMESeewz1g8c3xQSCMYtw==",
+  "_location": "/graphql-aql-generator",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "graphql-aql-generator",
+    "name": "graphql-aql-generator",
+    "escapedName": "graphql-aql-generator",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/graphql-aql-generator/-/graphql-aql-generator-2.1.0.tgz",
+  "_shasum": "024b0960c7929ccc16ee8dc4a3c5698871ddda5e",
+  "_spec": "graphql-aql-generator",
+  "_where": "C:\\Users\\David\\Develop\\newtirna-project\\newtrina-apollo-express",
+  "author": {
+    "name": "Manuel Baesler"
+  },
+  "bugs": {
+    "url": "https://github.com/baslr/graphql-aql-generator/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "graphql-sync": "0.10.1-sync",
+	"deasync": "^0.1.12"
+  },
+  "deprecated": false,
   "description": "query graphql with only a graphql idl schema",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/baslr/graphql-aql-generator.git"
-  },
+  "devDependencies": {},
+  "homepage": "https://github.com/baslr/graphql-aql-generator#readme",
   "keywords": [
     "graphql",
     "aql",
@@ -18,14 +46,15 @@
     "schema",
     "query"
   ],
-  "author": "Manuel Baesler",
   "license": "AGPL-3.0",
-  "bugs": {
-    "url": "https://github.com/baslr/graphql-aql-generator/issues"
+  "main": "index.js",
+  "name": "graphql-aql-generator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baslr/graphql-aql-generator.git"
   },
-  "homepage": "https://github.com/baslr/graphql-aql-generator#readme",
-  "dependencies": {
-    "graphql-sync": "0.10.1-sync"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {}
+  "version": "2.1.0"
 }
